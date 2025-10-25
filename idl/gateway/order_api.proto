@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package gateway.order;
+
+import "api.proto";
+import "gateway/common.proto";
+
+option go_package = "/gateway/order";
+
+service OrderService {
+  rpc OrderList(common.Empty) returns (common.Empty) {
+    option (api.get) = "/api/v1/order";
+  }
+  rpc SeckillPrePlaceOrder(SeckillPrePlaceOrderReq) returns (SeckillPrePlaceOrderResp) {
+    option (api.post) = "/api/v1/order/seckill/pre";
+  }
+  rpc SeckillPlaceOrder(SeckillPlaceOrderReq) returns (SeckillPlaceOrderResp) {
+    option (api.post) = "/api/v1/order/seckill";
+  }
+  rpc QueryOrder(QueryOrderReq) returns (QueryOrderResp) {
+    option (api.get) = "/api/v1/order/:order_id";
+  }
+  rpc PlaceOrder(PlaceOrderReq) returns (PlaceOrderResp) {
+    option (api.post) = "/api/v1/order";
+  }
+}
+
+message PlaceOrderReq {
+  string user_currency = 1;
+  Address address = 2;
+  string email = 3;
+  repeated OrderItem order_items = 4;
+}
+
+message PlaceOrderResp {
+  string order_id = 1;
+}
+
+message SeckillPrePlaceOrderReq {
+  uint32 product_id = 1 [(api.body) = "product_id"];
+}
+
+message SeckillPrePlaceOrderResp {
+  uint32 pre_order_id = 1;
+}
+
+message SeckillPlaceOrderReq {
+  string user_currency = 1 [(api.body) = "user_currency"];
+  Address address = 2 [(api.body) = "address"];
+  string email = 3 [(api.body) = "email"];
+
+  uint32 pre_order_id = 4;
+}
+
+message SeckillPlaceOrderResp {
+  string status = 1;
+  string order_id = 2;
+}
+
+message Address {
+  string street_address = 1;
+  string city = 2;
+  string state = 3;
+  string country = 4;
+  int32 zip_code = 5;
+}
+
+message QueryOrderReq {
+  string order_id = 1 [(api.path) = "order_id"];
+}
+
+message QueryOrderResp {
+  Order order = 1;
+}
+
+message Order {
+  repeated OrderItem order_items = 1;
+  string order_id = 2;
+  uint32 user_id = 3;
+  string user_currency = 4;
+  Address address = 5;
+  string email = 6;
+  string status = 7;
+  int32 created_at = 8;
+}
+
+message OrderItem {
+  CartItem item = 1;
+  float cost = 2;
+}
+
+message CartItem {
+  uint32 product_id = 1;
+  int32  quantity = 2;
+}

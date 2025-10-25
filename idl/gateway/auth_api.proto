@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package gateway.auth;
+
+import "api.proto";
+import "gateway/common.proto";
+
+option go_package = "/gateway/auth";
+
+message RegisterReq {
+  string email = 1 [(api.form) = "email"];
+  string password = 2 [(api.form) = "password"];
+  string confirm_password = 3 [(api.form) = "confirm_password"];
+}
+
+message LoginReq {
+  string email = 1 [(api.form) = "email"];
+  string password = 2 [(api.form) = "password"];
+  string next = 3 [(api.query) = "next"];
+}
+
+message MeReq {
+}
+
+message MeResp {
+  int64 id = 1;
+  string email = 2;
+  repeated Role roles = 3;
+}
+
+service AuthService {
+  rpc register(RegisterReq) returns (common.Empty) {
+    option (api.post) = "/api/v1/register";
+  }
+  rpc login(LoginReq) returns (common.Empty) {
+    option (api.post) = "/api/v1/login";
+  }
+  rpc logout(common.Empty) returns (common.Empty) {
+    option (api.post) = "/api/v1/logout";
+  }
+  rpc me(MeReq) returns (MeResp) {
+    option (api.get) = "/api/v1/me";
+  }
+  rpc refresh(common.Empty) returns (common.Empty) {
+    option (api.get) = "/api/v1/refresh";
+  }
+  rpc banUser(BanUserReq) returns (BanUserResp) {
+    option (api.post) = "/api/v1/ban";
+  }
+}
+
+message BanUserReq {
+  int64 userId = 1 [(api.body) = "user_id", (api.form) = "user_id", (api.vd) = "($ > 0 && $ < 100)"];
+  // expire
+  int64 expireSeconds = 2 [(api.body) = "expire_seconds", (api.form) = "expire_seconds", (api.vd) = "($ > 0 && $ < 100)"];
+}
+
+message BanUserResp {
+}
+
+message Permission {
+  int64 id = 1;
+  string v1 = 2;
+  string v2 = 3;
+}
+
+message PermissionRole {
+  int64 id = 1;
+  int64 rid = 2;
+  int64 pid = 3;
+}
+
+message CreatePermissionReq {
+  string v1 = 1 [(api.body) = "v1", (api.form) = "v1", (api.vd) = "(len($) > 0 && len($) < 100)"];
+  string v2 = 2 [(api.body) = "v2", (api.form) = "v2", (api.vd) = "(len($) > 0 && len($) < 100)"];
+}
+
+message CreatePermissionResp {
+  Permission permission = 1;
+}
+
+message BindPermissionRoleReq {
+  int64 pid = 1 [(api.body) = "pid", (api.form) = "pid", (api.vd) = "($ > 0 && $ < 100)"];
+  int64 rid = 2 [(api.body) = "rid", (api.form) = "rid", (api.vd) = "($ > 0 && $ < 100)"];
+}
+
+message BindPermissionRoleResp {
+  PermissionRole permissionRole = 3;
+}
+
+message ListPermissionsResp {
+  repeated Permission permissions = 1;
+}
+
+message UpdatePermissionReq {
+  int64 id = 1 [(api.body) = "id", (api.form) = "id", (api.vd) = "($ > 0 && $ < 100)"];
+  string v1 = 2 [(api.body) = "v1", (api.form) = "v1", (api.vd) = "(len($) > 0 && len($) < 100)"];
+  string v2 = 3 [(api.body) = "v2", (api.form) = "v2", (api.vd) = "(len($) > 0 && len($) < 100)"];
+}
+
+message UpdatePermissionResp {
+}
+
+message UnbindPermissionRoleReq {
+  int64 pid = 1 [(api.body) = "pid", (api.form) = "pid", (api.vd) = "($ > 0 && $ < 100)"];
+  int64 rid = 2 [(api.body) = "rid", (api.form) = "rid", (api.vd) = "($ > 0 && $ < 100)"];
+}
+
+message UnbindPermissionRoleResp {
+}
+
+service PermissionService {
+  rpc listPermissions(common.Empty) returns (ListPermissionsResp) {
+    option (api.get) = "/api/v1/permissions";
+  }
+  rpc createPermission(CreatePermissionReq) returns (CreatePermissionResp) {
+    option (api.post) = "/api/v1/permissions";
+  }
+  rpc updatePermission(UpdatePermissionReq) returns (UpdatePermissionResp) {
+    option (api.put) = "/api/v1/permissions";
+  }
+  rpc bindPermissionRole(BindPermissionRoleReq) returns (BindPermissionRoleResp) {
+    option (api.post) = "/api/v1/permissions/bind";
+  }
+  rpc unbindPermissionRole(UnbindPermissionRoleReq) returns (UnbindPermissionRoleResp) {
+    option (api.post) = "/api/v1/permissions/unbind";
+  }
+}
+
+message Role {
+  int64 id = 1;
+  string name = 2;
+}
+
+message CreateRoleReq {
+  string name = 1 [(api.body) = "name", (api.form) = "name", (api.vd) = "(len($) > 0 && len($) < 100)"];
+}
+
+message CreateRoleResp {
+  Role role = 3;
+}
+
+message BindRoleUserReq {
+  int64 uid = 1 [(api.body) = "uid", (api.form) = "uid", (api.vd) = "($ > 0 && $ < 100)"];
+  int64 rid = 2 [(api.body) = "rid", (api.form) = "rid", (api.vd) = "($ > 0 && $ < 100)"];
+}
+
+message BindRoleUserResp {
+}
+
+message ListRolesResp {
+  repeated Role roles = 1;
+}
+
+service RoleService {
+  rpc listRoles(common.Empty) returns (ListRolesResp) {
+    option (api.get) = "/api/v1/roles";
+  }
+  rpc createRole(CreateRoleReq) returns (CreateRoleResp) {
+    option (api.post) = "/api/v1/roles";
+  }
+  rpc bindRoleUser(BindRoleUserReq) returns (BindRoleUserResp) {
+    option (api.post) = "/api/v1/roles/bind";
+  }
+}

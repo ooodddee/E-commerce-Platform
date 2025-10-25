@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: "mysql:latest"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: "500Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-password
+                  key: password
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /mysql/data
+            - name: mysql-init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-data
+        - name: mysql-init-scripts
+          configMap:
+            name: mysql-init-scripts
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-scripts
+  namespace: default
+data:
+  init.sql: |
+    CREATE
+    DATABASE IF NOT EXISTS `cart`  
+        DEFAULT CHARACTER SET = 'utf8mb4';;
+    CREATE
+    DATABASE IF NOT EXISTS `checkout`
+        DEFAULT CHARACTER SET = 'utf8mb4';
+    CREATE
+    DATABASE IF NOT EXISTS `order`
+        DEFAULT CHARACTER SET = 'utf8mb4';
+    CREATE
+    DATABASE IF NOT EXISTS `payment`
+        DEFAULT CHARACTER SET = 'utf8mb4';
+    CREATE
+    DATABASE IF NOT EXISTS `product`
+        DEFAULT CHARACTER SET = 'utf8mb4';
+    CREATE
+    DATABASE IF NOT EXISTS `user`
+        DEFAULT CHARACTER SET = 'utf8mb4';
+    CREATE
+    DATABASE IF NOT EXISTS `auth`
+        DEFAULT CHARACTER SET = 'utf8mb4';
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+      nodePort: 30089
+  type: NodePort
+
+

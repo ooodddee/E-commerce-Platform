@@ -1,0 +1,9 @@
+.DS_Store
+.env
+app/**/nohup.out
+.idea/
+app/**/log/
+app/**/tmp/
+app/**/kitex_gen/
+
+go.work.sum
