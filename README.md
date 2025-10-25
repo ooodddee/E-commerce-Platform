@@ -2,35 +2,32 @@
 
 ## Project Overview
 
-This is a microservices-based e-commerce platform with multiple core services.
+This is a comprehensive microservices-based e-commerce platform built with modern cloud-native technologies, featuring AI-powered services for enhanced user experience.
 
-## Important Update: LLM Service Migration
+## AI-Powered Features
 
-**🔄 Successfully migrated from Volcengine ARK Platform to AWS Bedrock**
+**🤖 Advanced LLM Integration with AWS Bedrock**
 
-### Key Changes
+### Key Features
 
-1. **LLM Service Provider Migration**
-   - From: Volcengine ARK Platform
-   - To: AWS Bedrock
+1. **Intelligent Customer Support**
+   - AI-powered chat service using Claude 3 Sonnet
+   - Real-time conversation handling with streaming responses
+   - Context-aware product recommendations
 
-2. **Environment Variables Update**
+2. **Smart Product Search**
+   - Vector-based product embedding using Amazon Titan
+   - Semantic search capabilities for better product discovery
+   - Personalized recommendations based on user behavior
+
+3. **AWS Bedrock Configuration**
    ```bash
-   # Old Configuration (Removed)
-   ARK_CHAT_MODEL=
-   ARK_API_KEY=
-   
-   # New Configuration
    AWS_BEDROCK_MODEL=anthropic.claude-3-sonnet-20240229-v1:0
+   AWS_BEDROCK_EMBEDDING_MODEL=amazon.titan-embed-text-v1
    AWS_REGION=us-east-1
    AWS_ACCESS_KEY_ID=your-access-key-id
    AWS_SECRET_ACCESS_KEY=your-secret-access-key
    ```
-
-3. **Technology Stack Updates**
-   - Added: AWS SDK v2
-   - Removed: Volcengine SDK
-   - New: Custom Bedrock Chat Model Implementation
 
 ### Quick Start
 
@@ -59,39 +56,37 @@ This is a microservices-based e-commerce platform with multiple core services.
    kubectl apply -f deploy/k8s/
    ```
 
-### Detailed Documentation
-
-For complete migration guide and configuration instructions, see: [AWS_BEDROCK_MIGRATION_GUIDE.md](./AWS_BEDROCK_MIGRATION_GUIDE.md)
-
 ### Service Architecture
 
 ```
 ├── app/
 │   ├── cart/           # Shopping cart service
 │   ├── checkout/       # Checkout service  
-│   ├── email/          # Email service
-│   ├── gateway/        # API Gateway
-│   ├── llm/            # LLM service (migrated to AWS Bedrock)
-│   ├── order/          # Order service
-│   ├── payment/        # Payment service
-│   ├── product/        # Product service
-│   └── user/           # User service
-├── common/             # Common libraries
-├── deploy/             # Deployment configurations
-├── idl/                # Interface definitions
-└── rpc_gen/            # RPC generated code
+│   ├── email/          # Email notification service
+│   ├── gateway/        # API Gateway with load balancing
+│   ├── llm/            # AI-powered chat service (AWS Bedrock)
+│   ├── order/          # Order management service
+│   ├── payment/        # Payment processing service
+│   ├── product/        # Product catalog with AI search
+│   └── user/           # User management service
+├── common/             # Shared libraries and utilities
+├── deploy/             # Docker and Kubernetes configurations
+├── idl/                # Protocol buffer definitions
+└── rpc_gen/            # Generated RPC code
 ```
 
 ### Technology Stack
 
-- **Language**: Go
-- **RPC Framework**: Kitex
-- **Gateway**: Hertz
+- **Language**: Go 1.23
+- **RPC Framework**: CloudWeGo Kitex
+- **API Gateway**: CloudWeGo Hertz
+- **AI Services**: AWS Bedrock (Claude 3 Sonnet, Amazon Titan)
 - **Databases**: MySQL, MongoDB, Redis
-- **LLM**: AWS Bedrock (Claude 3)
+- **Search Engine**: Elasticsearch
+- **Message Queue**: Built-in async processing
 - **Deployment**: Docker, Kubernetes
 - **Monitoring**: Prometheus, Grafana
-- **Tracing**: Jaeger
+- **Distributed Tracing**: Jaeger
 
 ## Development Guide
 
@@ -132,46 +127,65 @@ kubectl apply -f deploy/k8s/
 
 ## Environment Configuration
 
-### AWS Bedrock Requirements
+### Prerequisites
 
-1. **AWS Account and Permissions**
-   - AWS account required
+1. **Go Environment**
+   - Go 1.23+ required
+   - Docker and Docker Compose for local development
+   - Kubernetes cluster for production deployment
+
+2. **AWS Bedrock Setup**
+   - AWS account with Bedrock access
    - IAM permissions: `bedrock:InvokeModel`, `bedrock:InvokeModelWithResponseStream`
-   - Model access permissions (must be requested in AWS Console)
+   - Model access for Claude 3 Sonnet and Amazon Titan (request in AWS Console)
 
-2. **Supported AWS Regions**
-   - us-east-1 (N. Virginia)
-   - us-west-2 (Oregon)  
-   - eu-west-1 (Ireland)
+3. **Infrastructure Requirements**
+   - MySQL 8.0+ for transactional data
+   - MongoDB for document storage
+   - Redis for caching and sessions
+   - Elasticsearch for product search
 
-3. **Supported Models**
-   - Anthropic Claude 3 Sonnet
-   - Anthropic Claude 2
-   - Amazon Titan
-   - Meta Llama 2
+## Features
+
+### Core E-commerce Functionality
+- **User Management**: Registration, authentication, profile management
+- **Product Catalog**: Advanced search with AI-powered recommendations
+- **Shopping Cart**: Real-time cart management and persistence
+- **Order Processing**: Complete order lifecycle management
+- **Payment Integration**: Secure payment processing
+- **Email Notifications**: Automated email communications
+
+### AI-Powered Capabilities
+- **Intelligent Chat Support**: Claude 3 powered customer service
+- **Smart Product Search**: Vector-based semantic search using Amazon Titan
+- **Personalized Recommendations**: ML-driven product suggestions
+- **Real-time Streaming**: Live chat with streaming AI responses
 
 ## Troubleshooting
 
-### LLM Service Issues
+### Common Issues
 
-1. **AWS Authentication Failed**
-   - Check AWS credentials configuration
-   - Verify IAM permissions
-   - Confirm AWS region settings
+1. **Service Discovery Issues**
+   - Verify service registry connectivity
+   - Check network policies in Kubernetes
+   - Ensure proper service mesh configuration
 
-2. **Model Access Denied**
-   - Request model access in AWS Console
-   - Verify model name and region support
+2. **Database Connection Problems**
+   - Validate connection strings and credentials
+   - Check database service health
+   - Verify network connectivity
 
-3. **Network Connection Issues**
-   - Check VPC and security group configuration
-   - Verify internet connectivity
+3. **AI Service Issues**
+   - Confirm AWS Bedrock credentials and permissions
+   - Check model availability in your region
+   - Verify API rate limits and quotas
 
-### General Issues
+### Monitoring and Debugging
 
-- View service logs: `kubectl logs -f deployment/{service-name}`
-- Check service status: `kubectl get pods`
-- Verify configuration: Check ConfigMap and Secret
+- **Service Logs**: `kubectl logs -f deployment/{service-name}`
+- **Service Health**: `kubectl get pods -l app={service-name}`
+- **Metrics Dashboard**: Access Grafana at `http://localhost:3000`
+- **Distributed Tracing**: View traces in Jaeger UI
 
 ## Contributing
 
